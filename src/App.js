@@ -1,9 +1,8 @@
 import 'regenerator-runtime/runtime'
 import React, { useState, useEffect } from 'react'
-import { Button, Form } from 'semantic-ui-react'
+import { Button, Form, Input } from 'semantic-ui-react'
 import { login, logout } from './utils'
 import './global.css'
-
 import getConfig from './config'
 const { networkId } = getConfig(process.env.NODE_ENV || 'development')
 
@@ -15,6 +14,7 @@ export default function App() {
   const [buttonDisabled, setButtonDisabled] = useState(false)
   const [showNotification, setShowNotification] = useState(false)
   const [isLoading, setLoading] = useState(false)
+  const [invalidNearAcc, isInvalidNearAcc] = useState(false)
 
   if (!window.walletConnection.isSignedIn()) {
     return (
@@ -31,29 +31,42 @@ export default function App() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    setShowNotification(false)
     setButtonDisabled(true)
     setLoading(true)
-          
-    const total = await window.contract.nft_total_supply()
 
-    await window.contract.nft_mint({
-      "token_id": total.toString(),
-      "metadata":{
-        "title": "Certificate of Completion",
-        "description": `${account} has successfully completed the requirements of ${program}`,
-        "media": certificate,
-        "copies": "1",
-        "issued_at": (new Date()).toISOString(),
-        "extra": JSON.stringify({
-          "program": program,
-          "cohort": cohort,
-          "owner": account
-        })
-      },
-      "owner_id": account
-    })
+    changeAccount(account.trim())
+    changeCertificate(certificate.trim())
+    changeProgram(program.trim())
+    changeCohort(cohort.trim())
 
-    setShowNotification(true)
+    if (
+      /^(([a-z\d]+[\-_])*[a-z\d]+\.)*([a-z\d]+[\-_])*[a-z\d]+$/.test(account)
+      && account.length >= 2
+      && account.length <= 64
+    ) {
+      const total = await window.contract.nft_total_supply()
+      await window.contract.nft_mint({
+        "token_id": total.toString(),
+        "metadata":{
+          "title": "Certificate of Completion",
+          "description": `${account} has successfully completed the requirements of ${program}`,
+          "media": certificate,
+          "copies": "1",
+          "issued_at": (new Date()).toISOString(),
+          "extra": JSON.stringify({
+            "program": program,
+            "cohort": cohort,
+            "owner": account
+          })
+        },
+        "owner_id": account
+      })
+      setShowNotification(true)
+    } else {
+      isInvalidNearAcc(true)
+    }
+
     setLoading(false)
     setButtonDisabled(false)
   }
@@ -73,24 +86,50 @@ export default function App() {
           Create NFT for NCD Certificate
         </h1>
         <Form onSubmit={handleSubmit}>
-          <Form.Field required>
-            <label>NEAR Account</label>
-            <input placeholder='NEAR Account' onChange={(e) => changeAccount(e.target.value)} value={account} />
-          </Form.Field>
-          <Form.Field required>
-            <label>Certificate URL</label>
-            <input placeholder='Certificate URL' onChange={(e) => changeCertificate(e.target.value)} value={certificate} />
-          </Form.Field>
-          <Form.Field required>
-            <label>Program</label>
-            <input placeholder='Program' onChange={(e) => changeProgram(e.target.value)} value={program} />
-          </Form.Field>
-          <Form.Field>
-            <label>Cohort</label>
-            <input placeholder='Cohort' onChange={(e) => changeCohort(e.target.value)} value={cohort} />
-          </Form.Field>
-          <p style={{ fontSize: '.9em', fontStyle: 'italic' }}><span style={{ color: '#db2828', fontWeight: 'bold' }}>*</span> – required fields</p>
-          <Button loading={isLoading} type='submit' disabled={buttonDisabled || !valid()}>Create</Button>
+          <Form.Field
+            control={Input}
+            required
+            label='NEAR Account'
+            placeholder='my_account.near'
+            onChange={(e) => {
+              changeAccount(e.target.value)
+              isInvalidNearAcc(false)
+            }}
+            value={account}
+            error={invalidNearAcc ? {
+              content: 'Please enter a valid NEAR account',
+              pointing: 'below',
+            } : false}
+          />
+          <Form.Field
+            control={Input}
+            required
+            label='Certificate URL'
+            placeholder='https://learnnear.club/new_certificate.pdf'
+            onChange={(e) => changeCertificate(e.target.value)}
+            value={certificate}
+          />
+          <Form.Field
+            control={Input}
+            required
+            label='Program'
+            placeholder='NEAR Certified Developers '
+            onChange={(e) => changeProgram(e.target.value)}
+            value={program}
+          />
+          <Form.Field
+            control={Input}
+            label='Cohort'
+            placeholder=''
+            onChange={(e) => changeCohort(e.target.value)}
+            value={cohort}
+          />
+          <p style={{ fontSize: '.9em', fontStyle: 'italic' }}>
+            <span style={{ color: '#db2828', fontWeight: 'bold' }}>*</span> – required fields
+          </p>
+          <Button color='green' loading={isLoading} type='submit' disabled={buttonDisabled || !valid()}>
+            Create
+          </Button>
         </Form>
       </main>
       {showNotification && <Notification />}
@@ -98,7 +137,6 @@ export default function App() {
   )
 }
 
-// this component gets rendered by App after the form is submitted
 function Notification() {
   const urlPrefix = `https://explorer.${networkId}.near.org/accounts`
   return (
@@ -106,8 +144,8 @@ function Notification() {
       <a target="_blank" rel="noreferrer" href={`${urlPrefix}/${window.accountId}`}>
         {window.accountId}
       </a>
-      {' '/* React trims whitespace around tags; insert literal space character when needed */}
-      called method: 'setGreeting' in contract:
+      {' '}
+      called method: 'nft_mint' in contract:
       {' '}
       <a target="_blank" rel="noreferrer" href={`${urlPrefix}/${window.contract.contractId}`}>
         {window.contract.contractId}

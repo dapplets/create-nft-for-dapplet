@@ -100829,6 +100829,7 @@ function App() {
   const [buttonDisabled, setButtonDisabled] = (0, _react.useState)(false);
   const [showNotification, setShowNotification] = (0, _react.useState)(false);
   const [isLoading, setLoading] = (0, _react.useState)(false);
+  const [invalidNearAcc, isInvalidNearAcc] = (0, _react.useState)(false);
 
   if (!window.walletConnection.isSignedIn()) {
     return /*#__PURE__*/_react.default.createElement("main", null, /*#__PURE__*/_react.default.createElement("h1", {
@@ -100849,26 +100850,37 @@ function App() {
 
   const handleSubmit = async event => {
     event.preventDefault();
+    setShowNotification(false);
     setButtonDisabled(true);
     setLoading(true);
-    const total = await window.contract.nft_total_supply();
-    await window.contract.nft_mint({
-      "token_id": total.toString(),
-      "metadata": {
-        "title": "Certificate of Completion",
-        "description": `${account} has successfully completed the requirements of ${program}`,
-        "media": certificate,
-        "copies": "1",
-        "issued_at": new Date().toISOString(),
-        "extra": JSON.stringify({
-          "program": program,
-          "cohort": cohort,
-          "owner": account
-        })
-      },
-      "owner_id": account
-    });
-    setShowNotification(true);
+    changeAccount(account.trim());
+    changeCertificate(certificate.trim());
+    changeProgram(program.trim());
+    changeCohort(cohort.trim());
+
+    if (/^(([a-z\d]+[\-_])*[a-z\d]+\.)*([a-z\d]+[\-_])*[a-z\d]+$/.test(account) && account.length >= 2 && account.length <= 64) {
+      const total = await window.contract.nft_total_supply();
+      await window.contract.nft_mint({
+        "token_id": total.toString(),
+        "metadata": {
+          "title": "Certificate of Completion",
+          "description": `${account} has successfully completed the requirements of ${program}`,
+          "media": certificate,
+          "copies": "1",
+          "issued_at": new Date().toISOString(),
+          "extra": JSON.stringify({
+            "program": program,
+            "cohort": cohort,
+            "owner": account
+          })
+        },
+        "owner_id": account
+      });
+      setShowNotification(true);
+    } else {
+      isInvalidNearAcc(true);
+    }
+
     setLoading(false);
     setButtonDisabled(false);
   };
@@ -100897,28 +100909,40 @@ function App() {
   }, /*#__PURE__*/_react.default.createElement("p", null, window.accountId))), /*#__PURE__*/_react.default.createElement("main", null, /*#__PURE__*/_react.default.createElement("h1", null, "Create NFT for NCD Certificate"), /*#__PURE__*/_react.default.createElement(_semanticUiReact.Form, {
     onSubmit: handleSubmit
   }, /*#__PURE__*/_react.default.createElement(_semanticUiReact.Form.Field, {
-    required: true
-  }, /*#__PURE__*/_react.default.createElement("label", null, "NEAR Account"), /*#__PURE__*/_react.default.createElement("input", {
-    placeholder: "NEAR Account",
-    onChange: e => changeAccount(e.target.value),
-    value: account
-  })), /*#__PURE__*/_react.default.createElement(_semanticUiReact.Form.Field, {
-    required: true
-  }, /*#__PURE__*/_react.default.createElement("label", null, "Certificate URL"), /*#__PURE__*/_react.default.createElement("input", {
-    placeholder: "Certificate URL",
+    control: _semanticUiReact.Input,
+    required: true,
+    label: "NEAR Account",
+    placeholder: "my_account.near",
+    onChange: e => {
+      changeAccount(e.target.value);
+      isInvalidNearAcc(false);
+    },
+    value: account,
+    error: invalidNearAcc ? {
+      content: 'Please enter a valid NEAR account',
+      pointing: 'below'
+    } : false
+  }), /*#__PURE__*/_react.default.createElement(_semanticUiReact.Form.Field, {
+    control: _semanticUiReact.Input,
+    required: true,
+    label: "Certificate URL",
+    placeholder: "https://learnnear.club/new_certificate.pdf",
     onChange: e => changeCertificate(e.target.value),
     value: certificate
-  })), /*#__PURE__*/_react.default.createElement(_semanticUiReact.Form.Field, {
-    required: true
-  }, /*#__PURE__*/_react.default.createElement("label", null, "Program"), /*#__PURE__*/_react.default.createElement("input", {
-    placeholder: "Program",
+  }), /*#__PURE__*/_react.default.createElement(_semanticUiReact.Form.Field, {
+    control: _semanticUiReact.Input,
+    required: true,
+    label: "Program",
+    placeholder: "NEAR Certified Developers ",
     onChange: e => changeProgram(e.target.value),
     value: program
-  })), /*#__PURE__*/_react.default.createElement(_semanticUiReact.Form.Field, null, /*#__PURE__*/_react.default.createElement("label", null, "Cohort"), /*#__PURE__*/_react.default.createElement("input", {
-    placeholder: "Cohort",
+  }), /*#__PURE__*/_react.default.createElement(_semanticUiReact.Form.Field, {
+    control: _semanticUiReact.Input,
+    label: "Cohort",
+    placeholder: "",
     onChange: e => changeCohort(e.target.value),
     value: cohort
-  })), /*#__PURE__*/_react.default.createElement("p", {
+  }), /*#__PURE__*/_react.default.createElement("p", {
     style: {
       fontSize: '.9em',
       fontStyle: 'italic'
@@ -100929,12 +100953,12 @@ function App() {
       fontWeight: 'bold'
     }
   }, "*"), " \u2013 required fields"), /*#__PURE__*/_react.default.createElement(_semanticUiReact.Button, {
+    color: "green",
     loading: isLoading,
     type: "submit",
     disabled: buttonDisabled || !valid()
   }, "Create"))), showNotification && /*#__PURE__*/_react.default.createElement(Notification, null));
-} // this component gets rendered by App after the form is submitted
-
+}
 
 function Notification() {
   const urlPrefix = `https://explorer.${networkId}.near.org/accounts`;
@@ -100942,9 +100966,7 @@ function Notification() {
     target: "_blank",
     rel: "noreferrer",
     href: `${urlPrefix}/${window.accountId}`
-  }, window.accountId), ' '
-  /* React trims whitespace around tags; insert literal space character when needed */
-  , "called method: 'setGreeting' in contract:", ' ', /*#__PURE__*/_react.default.createElement("a", {
+  }, window.accountId), ' ', "called method: 'nft_mint' in contract:", ' ', /*#__PURE__*/_react.default.createElement("a", {
     target: "_blank",
     rel: "noreferrer",
     href: `${urlPrefix}/${window.contract.contractId}`
@@ -101002,7 +101024,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "35949" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "33753" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -1,4 +1,4 @@
-create-nft-for-dapplet Smart Contract
+empty-near-project Smart Contract
 ==================
 
 A [smart contract] written in [AssemblyScript] for an app initialized with [create-near-app]
