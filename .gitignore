@@ -3,7 +3,7 @@
 # dependencies
 node_modules
 /.cache
-dist
+/dist
 /.pnp
 .pnp.js
 /out
