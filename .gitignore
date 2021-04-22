@@ -2,7 +2,7 @@
 # Developer note: near.gitignore will be renamed to .gitignore upon project creation
 # dependencies
 node_modules
-.cache
+/.cache
 dist
 /.pnp
 .pnp.js

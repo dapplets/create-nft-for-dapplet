@@ -4,7 +4,8 @@ import { Button, Form, Input } from 'semantic-ui-react'
 import { login, logout } from './utils'
 import './global.css'
 import getConfig from './config'
-const { networkId } = getConfig(process.env.NODE_ENV || 'development')
+// const { networkId } = getConfig(process.env.NODE_ENV || 'development')
+const { networkId } = getConfig('development')
 
 export default function App() {
   const [account, changeAccount] = useState('')
