@@ -100695,7 +100695,8 @@ var _config = _interopRequireDefault(require("./config"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const nearConfig = (0, _config.default)("development" || 'development');
+//const nearConfig = getConfig(process.env.NODE_ENV || 'development')
+const nearConfig = (0, _config.default)('development');
 
 async function initContract() {
   const near = await (0, _nearApiJs.connect)(Object.assign({
@@ -100859,24 +100860,34 @@ function App() {
     changeCohort(cohort.trim());
 
     if (/^(([a-z\d]+[\-_])*[a-z\d]+\.)*([a-z\d]+[\-_])*[a-z\d]+$/.test(account) && account.length >= 2 && account.length <= 64) {
-      const total = await window.contract.nft_total_supply();
-      await window.contract.nft_mint({
-        "token_id": total.toString(),
-        "metadata": {
-          "title": "Certificate of Completion",
-          "description": `${account} has successfully completed the requirements of ${program}`,
-          "media": certificate,
-          "copies": "1",
-          "issued_at": new Date().toISOString(),
-          "extra": JSON.stringify({
-            "program": program,
-            "cohort": cohort,
-            "owner": account
-          })
-        },
-        "owner_id": account
-      });
-      setShowNotification(true);
+      try {
+        const total = await window.contract.nft_total_supply();
+
+        try {
+          await window.contract.nft_mint({
+            "token_id": total.toString(),
+            "metadata": {
+              "title": "Certificate of Completion",
+              "description": `${account} has successfully completed the requirements of ${program}`,
+              "media": certificate,
+              "copies": "1",
+              "issued_at": new Date().toISOString(),
+              "extra": JSON.stringify({
+                "program": program,
+                "cohort": cohort,
+                "owner": account
+              })
+            },
+            "owner_id": account
+          });
+          setShowNotification(true);
+        } catch (error) {
+          isInvalidNearAcc(true);
+          console.log('Error in function window.contract.nft_mint().', error);
+        }
+      } catch (error) {
+        console.log('window.contract.nft_total_supply().', error);
+      }
     } else {
       isInvalidNearAcc(true);
     }
@@ -101024,7 +101035,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "33753" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "33905" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

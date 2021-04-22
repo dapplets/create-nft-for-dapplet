@@ -45,24 +45,33 @@ export default function App() {
       && account.length >= 2
       && account.length <= 64
     ) {
-      const total = await window.contract.nft_total_supply()
-      await window.contract.nft_mint({
-        "token_id": total.toString(),
-        "metadata":{
-          "title": "Certificate of Completion",
-          "description": `${account} has successfully completed the requirements of ${program}`,
-          "media": certificate,
-          "copies": "1",
-          "issued_at": (new Date()).toISOString(),
-          "extra": JSON.stringify({
-            "program": program,
-            "cohort": cohort,
-            "owner": account
+      try {
+        const total = await window.contract.nft_total_supply()
+        try {
+          await window.contract.nft_mint({
+            "token_id": total.toString(),
+            "metadata":{
+              "title": "Certificate of Completion",
+              "description": `${account} has successfully completed the requirements of ${program}`,
+              "media": certificate,
+              "copies": "1",
+              "issued_at": (new Date()).toISOString(),
+              "extra": JSON.stringify({
+                "program": program,
+                "cohort": cohort,
+                "owner": account
+              })
+            },
+            "owner_id": account
           })
-        },
-        "owner_id": account
-      })
-      setShowNotification(true)
+          setShowNotification(true)
+        } catch (error) {
+          isInvalidNearAcc(true)
+          console.log('Error in function window.contract.nft_mint().', error)
+        }
+      } catch (error) {
+        console.log('window.contract.nft_total_supply().', error)
+      }
     } else {
       isInvalidNearAcc(true)
     }
