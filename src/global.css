@@ -26,7 +26,7 @@ body {
 
 main {
   margin: 0 auto;
-  max-width: 25em;
+  max-width: 30em;
 }
 
 h1 {
@@ -35,7 +35,7 @@ h1 {
   background-repeat: no-repeat;
   background-size: auto 1.5em;
   margin-top: 0;
-  padding: 0.5em 0 3em !important;
+  padding: 0.5em 2.5em 3em !important;
   text-align: center;
 }
 

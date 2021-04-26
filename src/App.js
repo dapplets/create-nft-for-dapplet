@@ -71,7 +71,7 @@ export default function App() {
           console.log('Error in function window.contract.nft_mint().', error)
         }
       } catch (error) {
-        console.log('window.contract.nft_total_supply().', error)
+        console.log('Error in function window.contract.nft_total_supply().', error)
       }
     } else {
       isInvalidNearAcc(true)
@@ -111,14 +111,26 @@ export default function App() {
               pointing: 'below',
             } : false}
           />
-          <Form.Field
-            control={Input}
-            required
-            label='Certificate URL'
-            placeholder='https://learnnear.club/new_certificate.pdf'
-            onChange={(e) => changeCertificate(e.target.value)}
-            value={certificate}
-          />
+          <Form.Field required>
+            <label>Certificate URL</label>
+            <Input
+              type="url"
+              placeholder='learnnear.club/new_certificate.pdf'
+              onChange={(e) => changeCertificate(e.target.value)}
+              value={certificate}
+              actionPosition='left'
+            >
+              <Button
+                content='https:// +'
+                onClick={(e) => {
+                  e.preventDefault()
+                  !/^HTTP|HTTPS|http(s)?:\/\//.test(certificate)
+                    && changeCertificate('https://' + certificate)
+                }}
+              />
+              <input />
+            </Input>
+          </Form.Field>
           <Form.Field
             control={Input}
             required
