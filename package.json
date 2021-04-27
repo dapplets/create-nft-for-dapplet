@@ -1,6 +1,6 @@
 {
   "name": "create-nft-for-dapplet",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "scripts": {
     "build": "parcel build src/index.html --public-url ./",
@@ -8,7 +8,8 @@
     "start": "echo The app is starting! It will automatically open in your browser when ready && parcel src/index.html --open",
     "archive": "cd ./dist && tar -cvf temp.tar .",
     "swarm:upload": "curl -X POST -H \"Content-Type: application/x-tar\" -H \"Swarm-Index-Document: index.html\" -H \"Swarm-Error-Document: index.html\" --data-binary @dist/temp.tar https://swarm.dapplets.org/dirs",
-    "deploy": "npm run build && npm run archive && npm run swarm:upload"
+    "deploy": "npm run build && npm run archive && npm run swarm:upload",
+    "prettier": "npx prettier --write ."
   },
   "devDependencies": {
     "@babel/core": "~7.13.1",
