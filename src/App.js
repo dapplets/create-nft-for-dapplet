@@ -14,6 +14,7 @@ export default function App() {
   const [cohort, changeCohort] = useState('');
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [showErrorNotification, setShowErrorNotification] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [invalidNearAcc, isInvalidNearAcc] = useState(false);
 
@@ -67,10 +68,11 @@ export default function App() {
           });
           setShowNotification(true);
         } catch (error) {
-          isInvalidNearAcc(true);
+          setShowErrorNotification(true);
           console.log('Error in function window.contract.nft_mint().', error);
         }
       } catch (error) {
+        setShowErrorNotification(true);
         console.log('Error in function window.contract.nft_total_supply().', error);
       }
     } else {
@@ -164,6 +166,7 @@ export default function App() {
         </Form>
       </main>
       {showNotification && <Notification />}
+      {showErrorNotification && <ErrorNotification />}
     </div>
   );
 }
@@ -175,7 +178,7 @@ function Notification() {
       <a target="_blank" rel="noreferrer" href={`${urlPrefix}/${window.accountId}`}>
         {window.accountId}
       </a>{' '}
-      called method: 'nft_mint' in contract:{' '}
+      called method: <b>nft_mint</b> in contract:{' '}
       <a target="_blank" rel="noreferrer" href={`${urlPrefix}/${window.contract.contractId}`}>
         {window.contract.contractId}
       </a>
@@ -183,6 +186,34 @@ function Notification() {
         <div>✔ Succeeded</div>
         <div>Just now</div>
       </footer>
+    </aside>
+  );
+}
+
+function ErrorNotification() {
+  const urlPrefix = `https://explorer.${networkId}.near.org/accounts`;
+  return (
+    <aside className="errMessage">
+      <a target="_blank" rel="noreferrer" href={`${urlPrefix}/${window.accountId}`}>
+        {window.accountId}
+      </a>{' '}
+      tried to call method: <b>nft_mint</b> in contract:{' '}
+      <a target="_blank" rel="noreferrer" href={`${urlPrefix}/${window.contract.contractId}`}>
+        {window.contract.contractId}
+      </a>
+      <footer>
+        <div>✘ Failed</div>
+        <div>Just now</div>
+      </footer>
+      <br />
+      <p>
+        This could occur because{' '}
+        <a target="_blank" rel="noreferrer" href={`${urlPrefix}/${window.accountId}`}>
+          {window.accountId}
+        </a>{' '}
+        do not have enough rights to use this method
+      </p>
+      <p>Contact with the owner of the contract</p>
     </aside>
   );
 }

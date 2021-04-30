@@ -1,4 +1,4 @@
-const CONTRACT_NAME = 'dev-1618836841859-7031732'; // process.env.CONTRACT_NAME ||'create-nft-for-dapplet'
+const CONTRACT_NAME = 'dev-1619612403093-1786669'; // process.env.CONTRACT_NAME ||'create-nft-for-dapplet'
 
 function getConfig(env) {
   switch (env) {

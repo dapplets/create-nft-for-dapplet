@@ -8,6 +8,7 @@ html {
   --gray: #555;
   --light-gray: #ccc;
   --shadow: #e6e6e6;
+  --shadowErr: #ffdfdf;
   --success: rgb(90, 206, 132);
   --primary: #ff585d;
   --secondary: #0072ce;
@@ -148,11 +149,11 @@ li {
 }
 
 aside {
-  animation: notify ease-in-out 10s;
+  animation: notify ease-in-out 20s;
   background-color: var(--shadow);
   border-radius: 5px;
   bottom: 0;
-  font-size: 0.8em;
+  font-size: 1em;
   margin: 1em;
   padding: 1em;
   position: fixed;
@@ -161,9 +162,10 @@ aside {
 }
 aside footer {
   display: flex;
-  font-size: 0.9em;
+  font-size: 1.1em;
+  font-weight: bold;
   justify-content: space-between;
-  margin-top: 0.5em;
+  margin-top: 0.7em;
 }
 aside footer *:first-child {
   color: var(--success);
@@ -171,6 +173,17 @@ aside footer *:first-child {
 aside footer *:last-child {
   color: var(--gray);
 }
+
+.errMessage {
+  background-color: var(--shadowErr);
+  animation: notifyErr cubic-bezier(0.25, 0.46, 0.45, 0.94) 1s;
+  transform: none;
+}
+
+.errMessage footer *:first-child {
+  color: var(--primary);
+}
+
 @keyframes notify {
   0% {
     transform: translateY(10em);
@@ -183,6 +196,15 @@ aside footer *:last-child {
   }
   100% {
     transform: translateY(10em);
+  }
+}
+
+@keyframes notifyErr {
+  from {
+    transform: translateY(10em);
+  }
+  to {
+    transform: translateY(0);
   }
 }
 

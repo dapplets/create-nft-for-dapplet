@@ -1,6 +1,6 @@
 {
   "name": "create-nft-for-dapplet",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "license": "MIT",
   "scripts": {
     "build": "parcel build src/index.html --public-url ./",
